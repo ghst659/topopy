@@ -1,0 +1,7 @@
+include README.md
+
+# Include the test suite
+# recursive-include (anything)
+
+# If using Python 2.6 or less, then have to include package data, even though
+# it's already declared in setup.py
