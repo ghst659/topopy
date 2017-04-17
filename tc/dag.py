@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+# Copyright (c) 2016 ghst659@github.com
+# All rights reserved.
 """Dependency Graph Traversal."""
 from __future__ import print_function
 
