@@ -6,7 +6,7 @@ setuptools.setup(
     version='0.1',
     description='Python topo',
     long_description='Python Directed Graph',
-    url='https://github.com/ghst659/topo_py.git',
+    url='https://github.com/ghst659/topopy.git',
     license='GPLv3',
     keywords='python topo',
     classifiers=[
