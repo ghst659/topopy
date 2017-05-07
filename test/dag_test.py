@@ -1,6 +1,9 @@
 #!/usr/bin/env python3
 # Copyright (c) 2016 ghst659@github.com
 # All rights reserved.
+import queue
+import sys
+import threading
 import unittest
 import tc.dag
 
@@ -124,5 +127,71 @@ class TestGraphSubGraph(TestGraphEdges):
         ])
         self.assertEqual(expected_edges, set(edges))
 
+class TestingOperator:
+    def __init__(self):
+        self._lock = threading.RLock();
+        self._visit_order = []
+
+    def visit(self, node, **kwargs):
+        result = None
+        try:
+            if node.startswith("TEX"):
+                raise ValueError("TEX raised this exception")
+            elif node.startswith("TNT"):
+                raise tc.dag.NonTerminatingException("TNT stumble")
+            else:
+                result = 'Visited ' + node;
+        finally:
+            with self._lock:
+                self._visit_order.append(node)
+        return result
+
+    def visits(self):
+        with self._lock:
+            return list(self._visit_order)
+    
+class TestTraversal(TestBase):
+    def setUp(self):
+        super(TestTraversal, self).setUp()
+        self.op = TestingOperator()
+        self.rabbit = tc.dag.Rabbit(self.dag, self.op)
+    def tearDown(self):
+        del self.rabbit
+        del self.op
+        super(TestTraversal, self).tearDown()
+    def test_single_node(self):
+        self.dag.add_node("One")
+        self.rabbit.run(4, 1, None, None)
+        # print(self.rabbit.completions(), file=sys.stderr)
+        self.assertEqual(self.rabbit.result("One"), "Visited One")
+    def test_three_node(self):
+        self.dag.add_edge("pre", "mid")
+        self.dag.add_edge("mid", "suc")
+        self.rabbit.run(4, 5, None, None)
+        self.assertEqual(self.rabbit.result("pre"), "Visited pre")
+        self.assertEqual(self.rabbit.result("mid"), "Visited mid")
+        self.assertEqual(self.rabbit.result("suc"), "Visited suc")
+        self.assertEqual(self.op.visits(), ["pre", "mid", "suc"])
+    def test_diamond(self):
+        self.dag.add_edge("pre", "mid")
+        self.dag.add_edge("pre", "sib")
+        self.dag.add_edge("mid", "suc")
+        self.dag.add_edge("sib", "suc")
+        self.rabbit.run(4, 5, None, None)
+        order = self.op.visits()
+        self.assertTrue(order.index("pre") < order.index("mid"))
+        self.assertTrue(order.index("pre") < order.index("sib"))
+        self.assertTrue(order.index("suc") > order.index("mid"))
+        self.assertTrue(order.index("suc") > order.index("sib"))
+    def test_non_fatal(self):
+        self.dag.add_edge("A", "B")
+        self.dag.add_edge("B", "C")
+        self.dag.add_edge("A", "TNT")
+        self.dag.add_edge("TNT", "D")
+        self.rabbit.run(4, 1, None, None)
+        with self.assertRaises(tc.dag.NonTerminatingException):
+            self.rabbit.result("TNT")
+        self.assertTrue("D" in self.rabbit.blocked())
+        
 if __name__ == "__main__":
     unittest.main()
