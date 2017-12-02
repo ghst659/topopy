@@ -173,7 +173,7 @@ class Graph:
 class NonTerminatingException(Exception):
     pass
 
-class Rabbit:
+class Runner:
     def __init__(self, graph, operator):
         self._net = graph
         self._op = operator
