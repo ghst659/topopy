@@ -92,17 +92,17 @@ class TestGraphEdges(TestBase):
         self.assertEqual(set(["U0-0"]), self.dag.highest())
         self.assertEqual(set(["L0-0"]), self.dag.lowest())
 
-class TestGraphSubGraph(TestGraphEdges):
+class TestGraphSubNet(TestGraphEdges):
     def test_whole(self):
         count = 0
         for edge in self.gen_diamond(3, 2):
             self.dag.add_edge(*edge)
             count += 1
-        subgraph = self.dag.subgraph()
-        self.assertEqual(self.dag.size(), len(subgraph.nodes))
-        self.assertEqual(1, len(subgraph.upper))
-        self.assertEqual(1, len(subgraph.lower))
-        edges = self.dag.subgraph_edges(subgraph)
+        subnet = self.dag.subnet()
+        self.assertEqual(self.dag.size(), len(subnet.nodes))
+        self.assertEqual(1, len(subnet.upper))
+        self.assertEqual(1, len(subnet.lower))
+        edges = self.dag.subnet_edges(subnet)
         self.assertEqual(count, len(edges))
 
     def test_partial(self):
@@ -110,14 +110,14 @@ class TestGraphSubGraph(TestGraphEdges):
         for edge in self.gen_diamond(3, 2):
             self.dag.add_edge(*edge)
             count += 1
-        subgraph = self.dag.subgraph(["U0-0"], ["L1-1"])
+        subnet = self.dag.subnet(["U0-0"], ["L1-1"])
         expected = set([
             "U0-0", "U1-1", "X2-2", "X2-3", "L1-1"
         ])
-        self.assertEqual(expected, subgraph.nodes)
-        self.assertEqual(1, len(subgraph.upper))
-        self.assertEqual(1, len(subgraph.lower))
-        edges = self.dag.subgraph_edges(subgraph)
+        self.assertEqual(expected, subnet.nodes)
+        self.assertEqual(1, len(subnet.upper))
+        self.assertEqual(1, len(subnet.lower))
+        edges = self.dag.subnet_edges(subnet)
         expected_edges = set([
             ("U0-0", "U1-1"),
             ("U1-1", "X2-2"),
