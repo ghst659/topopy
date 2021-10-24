@@ -50,18 +50,10 @@ class Graph:
         """Return the number of nodes."""
         return len(self._nodes)
 
-    def all_nodes(self):
+    def all_nodes(self) -> set[Hashable]:
         """Return all nodes; order is not specified."""
         with self._lock:
             return set(self._nodes)
-
-    def _valid(self, nodes: Optional[Collection[Hashable]]) -> bool:
-        """Return a subset of NODES actually in the graph."""
-        with self._lock:
-            if nodes is None:
-                return set()
-            else:
-                return set(n for n in nodes if n in self._nodes)
 
     def has_node(self, n: Hashable) -> bool:
         """Check if N is a node in the graph."""
@@ -202,7 +194,7 @@ class Runner:
     _rv_enter: dict[Hashable, concurrent.futures.Future]
     _rv_leave: dict[Hashable, time.time]
     _rv_block: set[Hashable]
-    def __init__(self, graph: Graph, operator):
+    def __init__(self, graph: Graph, operator: Callable[[Hashable], Any]):
         self._net = graph
         self._op = operator
         self._lock = threading.RLock()
@@ -268,7 +260,7 @@ class Runner:
     def _visit_single(self, node: Hashable, **kwargs: Mapping[Hashable, Any]) -> Any:
         result = None
         try:
-            result = self._op.visit(node, **kwargs)
+            result = self._op(node, **kwargs)
         except NonTerminatingException:
             self._update_blocks(node)
             raise

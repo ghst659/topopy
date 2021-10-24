@@ -154,7 +154,7 @@ class TestTraversal(TestBase):
     def setUp(self):
         super(TestTraversal, self).setUp()
         self.op = TestingOperator()
-        self.rabbit = dag.Runner(self.dag, self.op)
+        self.rabbit = dag.Runner(self.dag, self.op.visit)
     def tearDown(self):
         del self.rabbit
         del self.op
