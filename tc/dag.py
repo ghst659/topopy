@@ -121,13 +121,13 @@ class Graph:
                 self._nodes[lo][Direction.UP.value].discard(hi)
 
     def _reachables(self,
-                    starts: Optional[Collection[Hashable]],
+                    starts: Collection[Hashable],
                     direction: Direction,
                     stops: Optional[Collection[Hashable]]) -> set[Hashable]:
         """Trace reachable nodes from STARTS in DIRECTION to STOPS."""
         result = set()
         if stops is None:
-            stops = []
+            stops = tuple()
         with self._lock:
             visited = set()
             pending = set(n for n in starts if n in self._nodes)
