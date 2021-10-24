@@ -5,11 +5,11 @@ import queue
 import sys
 import threading
 import unittest
-import tc.dag
+import dag
 
 class TestBase(unittest.TestCase):
     def setUp(self):
-        self.dag = tc.dag.Graph()
+        self.dag = dag.Graph()
 
     def tearDown(self):
         del self.dag
@@ -138,7 +138,7 @@ class TestingOperator:
             if node.startswith("TEX"):
                 raise ValueError("TEX raised this exception")
             elif node.startswith("TNT"):
-                raise tc.dag.NonTerminatingException("TNT stumble")
+                raise dag.NonTerminatingException("TNT stumble")
             else:
                 result = 'Visited ' + node;
         finally:
@@ -154,7 +154,7 @@ class TestTraversal(TestBase):
     def setUp(self):
         super(TestTraversal, self).setUp()
         self.op = TestingOperator()
-        self.rabbit = tc.dag.Runner(self.dag, self.op)
+        self.rabbit = dag.Runner(self.dag, self.op)
     def tearDown(self):
         del self.rabbit
         del self.op
@@ -189,7 +189,7 @@ class TestTraversal(TestBase):
         self.dag.add_edge("A", "TNT")
         self.dag.add_edge("TNT", "D")
         self.rabbit.run(4, 1, None, None)
-        with self.assertRaises(tc.dag.NonTerminatingException):
+        with self.assertRaises(dag.NonTerminatingException):
             self.rabbit.result("TNT")
         self.assertTrue("D" in self.rabbit.blocked())
         
