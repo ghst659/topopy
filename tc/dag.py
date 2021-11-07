@@ -91,9 +91,9 @@ class Graph:
     def _remove_neighbour_references(self, n: Hashable, direction: Direction):
         """Remove references to N from N's neighbours in DIRECTION."""
         with self._lock:
-            vecinos = self._neighbours(n, direction)
+            voisins = self._neighbours(n, direction)
             reverse = direction.invert()
-            for v in vecinos:
+            for v in voisins:
                 self._nodes[v][reverse.value].remove(n)
 
     def del_node(self, n: Hashable):
@@ -251,11 +251,11 @@ class Runner:
             prereqs = set(v for v in self._net.predecessors(n)
                           if v in self._rspec_graph.nodes)
             with self._lock:
-                completions = set(self._rv_leave.keys())
+                completions = self._rv_leave.keys()
                 if completions >= prereqs and n not in self._rv_enter:
-                    future = self._rv_pool.submit(self._visit_single, n,
+                    avenir = self._rv_pool.submit(self._visit_single, n,
                                                   **self._rspec_meta)
-                    self._rv_enter[n] = future
+                    self._rv_enter[n] = avenir
 
     def _visit_single(self, node: Hashable, **kwargs: Mapping[Hashable, Any]) -> Any:
         result = None
@@ -271,10 +271,9 @@ class Runner:
         finally:
             self._rv_leave[node] = time.time()
         with self._lock:
-            concluded = self._rv_block | set(self._rv_leave.keys())
+            concluded = self._rv_block | self._rv_leave.keys()
             if concluded >= self._rspec_graph.nodes:
                 self._rv_stop.set()
-                # self._rv_pool.shutdown()
             else:
                 self._visit_multi(self._net.successors(node))
         return result
